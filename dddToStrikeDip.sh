@@ -17,11 +17,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 if [ $# -eq 0 ]; then
-    printf "Usage: %s [-a | -b | -u] [-r] (MEASUREMENT | MEASUREMENT_FILE)...\n" "$0"
+    printf "Usage: %s (-a | -b | -A | -B) [-r] (MEASUREMENT | MEASUREMENT_FILE)...\n" "$0"
     printf "%s\n%s\n%s\n%s\n%s\n%s\n" \
-	"       -a    strike in UK-RHR-azimuth format,  dip direction 90⁰ counter-clockwise from strike" \
+	"       -a    strike in    RHR-azimuth format,  dip direction 90⁰ clockwise from strike" \
 	"       -b    strike in    RHR-bearing format,  dip direction 90⁰ clockwise from strike" \
-	"       -u    strike in UK-RHR-bearing format,  dip direction 90⁰ counter-clockwise from strike" \
+	"       -A    strike in UK-RHR-azimuth format,  dip direction 90⁰ counter-clockwise from strike" \
+	"       -B    strike in UK-RHR-bearing format,  dip direction 90⁰ counter-clockwise from strike" \
 	"       -r    print out number of converted and invalid measurements" \
 	"       -h    Display help"
     exit 1
@@ -190,15 +191,16 @@ read_file(){
     do
 	check_d_dd_measurement "$line"
 	if [ $? -eq 0 ]; then
-	    convert_measurement_to_RHR_azimuth "$line"
-
 	    if [ ! -z "$2" ]; then
-		convert_measurement_to_UK_RHR_azimuth "$line"
+		convert_measurement_to_RHR_azimuth "$line"
 	    fi
 	    if [ ! -z "$3" ]; then
 		convert_measurement_to_RHR_bearing "$line"
 	    fi
 	    if [ ! -z "$4" ]; then
+		convert_measurement_to_UK_RHR_azimuth "$line"
+	    fi
+	    if [ ! -z "$5" ]; then
 		convert_measurement_to_UK_RHR_bearing "$line"
 	    fi
 
@@ -213,15 +215,16 @@ read_file(){
 read_measurement(){
     check_d_dd_measurement "$1"
     if [ $? -eq 0 ]; then
-	convert_measurement_to_RHR_azimuth "$1"
-
 	if [ ! -z "$2" ]; then
-	    convert_measurement_to_UK_RHR_azimuth "$1"
+	    convert_measurement_to_RHR_azimuth "$1"
 	fi
 	if [ ! -z "$3" ]; then
 	    convert_measurement_to_RHR_bearing "$1"
 	fi
 	if [ ! -z "$4" ]; then
+	    convert_measurement_to_UK_RHR_azimuth "$1"
+	fi
+	if [ ! -z "$5" ]; then
 	    convert_measurement_to_UK_RHR_bearing "$1"
 	fi
 
@@ -244,32 +247,35 @@ print_conversion_report(){
 
 declare aflag=
 declare bflag=
-declare uflag=
+declare Aflag=
+declare Bflag=
 declare rflag=
-declare oflag=
 
-while getopts ":aburh" name
+while getopts ":aAbBrh" name
 do
     case "$name"
 	in
 	a) aflag=1 ;;
 	b) bflag=1 ;;
-	u) uflag=1 ;;
+	A) Aflag=1 ;;
+	B) Bflag=1 ;;
 	r) rflag=1 ;;
 	\?) echo "[ERROR] : Unknown option -$OPTARG" 1>&2
-	    printf "          Usage: %s [-a | -b | -u] [-r] (MEASUREMENT | MEASUREMENT_FILE)...\n" "$0"
+	    printf "          Usage: %s (-a | -b | -A | -B) [-r] (MEASUREMENT | MEASUREMENT_FILE)...\n" "$0"
 	    printf "%s\n%s\n%s\n%s\n%s\n%s\n" \
-		"                 -a    strike in UK-RHR-azimuth format,  dip direction 90⁰ counter-clockwise from strike" \
+		"                 -a    strike in    RHR-azimuth format,  dip direction 90⁰ clockwise from strike" \
 		"                 -b    strike in    RHR-bearing format,  dip direction 90⁰ clockwise from strike" \
-		"                 -u    strike in UK-RHR-bearing format,  dip direction 90⁰ counter-clockwise from strike" \
+		"                 -A    strike in UK-RHR-azimuth format,  dip direction 90⁰ counter-clockwise from strike" \
+		"                 -B    strike in UK-RHR-bearing format,  dip direction 90⁰ counter-clockwise from strike" \
 		"                 -r    print out number of converted and invalid measurements" \
 		"                 -h    Display help"
 	    exit 2 ;;
-	h|*) printf "Usage: %s [-a | -b | -u] [-r] (MEASUREMENT | MEASUREMENT_FILE)...\n" "$0"
+	h|*) printf "Usage: %s (-a | -b | -A | -B) [-r] (MEASUREMENT | MEASUREMENT_FILE)...\n" "$0"
 	    printf "%s\n%s\n%s\n%s\n%s\n%s\n" \
-		"       -a    strike in UK-RHR-azimuth format,  dip direction 90⁰ counter-clockwise from strike" \
+		"       -a    strike in    RHR-azimuth format,  dip direction 90⁰ clockwise from strike" \
 		"       -b    strike in    RHR-bearing format,  dip direction 90⁰ clockwise from strike" \
-		"       -u    strike in UK-RHR-bearing format,  dip direction 90⁰ counter-clockwise from strike" \
+		"       -A    strike in UK-RHR-azimuth format,  dip direction 90⁰ counter-clockwise from strike" \
+		"       -B    strike in UK-RHR-bearing format,  dip direction 90⁰ counter-clockwise from strike" \
 		"       -r    print out number of converted and invalid measurements" \
 		"       -h    Display help"
 	    exit 0 ;;
@@ -277,12 +283,22 @@ do
 done
 shift $((OPTIND - 1))
 
+if [ -z "$aflag"  -a  -z "$bflag"  -a  -z "$Aflag"  -a  -z "$Bflag" ]; then
+    echo "[ERROR] : Must pick an output format (-a | -b | -A | -B)" 1>&2
+    exit 3
+fi
+
+if [ -z "$1" ];then
+    echo "[ERROR] : Must use at least one MEASUREMENT | MEASUREMENT_FILE as input" 1>&2
+    exit 4
+fi
+
 for arg
 do
     if [ -f "$1" ]; then
-	read_file "$1" "$aflag" "$bflag" "$uflag"
+	read_file "$1" "$aflag" "$bflag" "$Aflag" "$Bflag"
     else
-	read_measurement "$1" "$aflag" "$bflag" "$uflag"
+	read_measurement "$1" "$aflag" "$bflag" "$Aflag" "$Bflag"
     fi
 
     shift
