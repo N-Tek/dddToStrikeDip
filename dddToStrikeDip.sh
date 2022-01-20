@@ -23,6 +23,7 @@ if [ $# -eq 0 ]; then
 	"       -b    strike in    RHR-bearing format,  dip direction 90⁰ clockwise from strike" \
 	"       -A    strike in UK-RHR-azimuth format,  dip direction 90⁰ counter-clockwise from strike" \
 	"       -B    strike in UK-RHR-bearing format,  dip direction 90⁰ counter-clockwise from strike" \
+	"       -d DELIM   use DELIM instead of space as the delimiter of output values" \
 	"       -r    print out number of converted and invalid measurements" \
 	"       -h    Display help"
     exit 1
@@ -76,7 +77,11 @@ convert_measurement_to_RHR_azimuth(){
 	direction_of_dip="NW"
     fi
 
-    printf "%03d/%d%s " $strike $dip $direction_of_dip
+    if [ -z "$dflag" ]; then
+	printf "%03d/%d%s " "$strike" "$dip" "$direction_of_dip"
+    else
+	printf "%03d/%d%s%s" "$strike" "$dip" "$direction_of_dip" "$dval"
+    fi
 }
 
 convert_measurement_to_RHR_bearing(){
@@ -114,7 +119,11 @@ convert_measurement_to_RHR_bearing(){
 	direction_of_dip="NW"
     fi
 
-    printf "%s/%d%s " $strike $dip $direction_of_dip
+    if [ -z "$dflag" ]; then
+	printf "%s/%d%s " "$strike" "$dip" "$direction_of_dip"
+    else
+	printf "%s/%d%s%s" "$strike" "$dip" "$direction_of_dip" "$dval"
+    fi
 }
 
 convert_measurement_to_UK_RHR_azimuth(){
@@ -145,7 +154,11 @@ convert_measurement_to_UK_RHR_azimuth(){
 	direction_of_dip="NW"
     fi
 
-    printf "%03d/%d%s " $strike $dip $direction_of_dip
+    if [ -z "$dflag" ]; then
+	printf "%03d/%d%s " "$strike" "$dip" "$direction_of_dip"
+    else
+	printf "%03d/%d%s%s" "$strike" "$dip" "$direction_of_dip" "$dval"
+    fi
 }
 
 convert_measurement_to_UK_RHR_bearing(){
@@ -183,7 +196,11 @@ convert_measurement_to_UK_RHR_bearing(){
 	direction_of_dip="NW"
     fi
 
-    printf "%s/%d%s " $strike $dip $direction_of_dip
+    if [ -z "$dflag" ]; then
+	printf "%s/%d%s " "$strike" "$dip" "$direction_of_dip"
+    else
+	printf "%s/%d%s%s" "$strike" "$dip" "$direction_of_dip" "$dval"
+    fi
 }
 
 read_file(){
@@ -192,16 +209,16 @@ read_file(){
 	check_d_dd_measurement "$line"
 	if [ $? -eq 0 ]; then
 	    if [ ! -z "$2" ]; then
-		convert_measurement_to_RHR_azimuth "$line"
+		convert_measurement_to_RHR_azimuth "$line" "$6"
 	    fi
 	    if [ ! -z "$3" ]; then
-		convert_measurement_to_RHR_bearing "$line"
+		convert_measurement_to_RHR_bearing "$line" "$6"
 	    fi
 	    if [ ! -z "$4" ]; then
-		convert_measurement_to_UK_RHR_azimuth "$line"
+		convert_measurement_to_UK_RHR_azimuth "$line" "$6"
 	    fi
 	    if [ ! -z "$5" ]; then
-		convert_measurement_to_UK_RHR_bearing "$line"
+		convert_measurement_to_UK_RHR_bearing "$line" "$6"
 	    fi
 
 	    printf "\n"
@@ -216,16 +233,16 @@ read_measurement(){
     check_d_dd_measurement "$1"
     if [ $? -eq 0 ]; then
 	if [ ! -z "$2" ]; then
-	    convert_measurement_to_RHR_azimuth "$1"
+	    convert_measurement_to_RHR_azimuth "$1" "$6"
 	fi
 	if [ ! -z "$3" ]; then
-	    convert_measurement_to_RHR_bearing "$1"
+	    convert_measurement_to_RHR_bearing "$1" "$6"
 	fi
 	if [ ! -z "$4" ]; then
-	    convert_measurement_to_UK_RHR_azimuth "$1"
+	    convert_measurement_to_UK_RHR_azimuth "$1" "$6"
 	fi
 	if [ ! -z "$5" ]; then
-	    convert_measurement_to_UK_RHR_bearing "$1"
+	    convert_measurement_to_UK_RHR_bearing "$1" "$6"
 	fi
 
 	printf "\n"
@@ -249,9 +266,10 @@ declare aflag=
 declare bflag=
 declare Aflag=
 declare Bflag=
+declare dflag=
 declare rflag=
 
-while getopts ":aAbBrh" name
+while getopts ":aAbBd:rh" name
 do
     case "$name"
 	in
@@ -259,6 +277,10 @@ do
 	b) bflag=1 ;;
 	A) Aflag=1 ;;
 	B) Bflag=1 ;;
+	d) dflag=1
+	    dval="$OPTARG" ;;
+	:) echo "[ERROR] : Missing DELIM for option -$OPTARG" 1>&2
+	    exit 5 ;;
 	r) rflag=1 ;;
 	\?) echo "[ERROR] : Unknown option -$OPTARG" 1>&2
 	    printf "          Usage: %s (-a | -b | -A | -B) [-r] (MEASUREMENT | MEASUREMENT_FILE)...\n" "$0"
@@ -267,6 +289,7 @@ do
 		"                 -b    strike in    RHR-bearing format,  dip direction 90⁰ clockwise from strike" \
 		"                 -A    strike in UK-RHR-azimuth format,  dip direction 90⁰ counter-clockwise from strike" \
 		"                 -B    strike in UK-RHR-bearing format,  dip direction 90⁰ counter-clockwise from strike" \
+		"                 -d DELIM   use DELIM instead of space as the delimiter of output values" \
 		"                 -r    print out number of converted and invalid measurements" \
 		"                 -h    Display help"
 	    exit 2 ;;
@@ -276,6 +299,7 @@ do
 		"       -b    strike in    RHR-bearing format,  dip direction 90⁰ clockwise from strike" \
 		"       -A    strike in UK-RHR-azimuth format,  dip direction 90⁰ counter-clockwise from strike" \
 		"       -B    strike in UK-RHR-bearing format,  dip direction 90⁰ counter-clockwise from strike" \
+		"       -d DELIM   use DELIM instead of space as the delimiter of output values" \
 		"       -r    print out number of converted and invalid measurements" \
 		"       -h    Display help"
 	    exit 0 ;;
@@ -296,9 +320,9 @@ fi
 for arg
 do
     if [ -f "$1" ]; then
-	read_file "$1" "$aflag" "$bflag" "$Aflag" "$Bflag"
+	read_file "$1" "$aflag" "$bflag" "$Aflag" "$Bflag" "$dflag"
     else
-	read_measurement "$1" "$aflag" "$bflag" "$Aflag" "$Bflag"
+	read_measurement "$1" "$aflag" "$bflag" "$Aflag" "$Bflag" "$dflag"
     fi
 
     shift
