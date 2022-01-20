@@ -17,12 +17,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 if [ $# -eq 0 ]; then
-    printf "Usage: %s [-a | -b | -u] [-r] [-o OUTPUT_PATH] (MEASUREMENT | MEASUREMENT_FILE)...\n" "$0"
+    printf "Usage: %s [-a | -b | -u] [-r] (MEASUREMENT | MEASUREMENT_FILE)...\n" "$0"
     printf "%s\n%s\n%s\n%s\n%s\n%s\n" \
 	"       -a    strike in UK-RHR-azimuth format,  dip direction 90⁰ counter-clockwise from strike" \
 	"       -b    strike in    RHR-bearing format,  dip direction 90⁰ clockwise from strike" \
 	"       -u    strike in UK-RHR-bearing format,  dip direction 90⁰ counter-clockwise from strike" \
-	"       -o OUTPUT_PATH   write output in to the OUTPUT_PATH" \
 	"       -r    print out number of converted and invalid measurements" \
 	"       -h    Display help"
     exit 1
@@ -76,11 +75,7 @@ convert_measurement_to_RHR_azimuth(){
 	direction_of_dip="NW"
     fi
 
-    if [ ! -z "$2" ]; then
-	printf "%03d/%d%s " $strike $dip $direction_of_dip >> "$output"
-    else
-	printf "%03d/%d%s " $strike $dip $direction_of_dip
-    fi
+    printf "%03d/%d%s " $strike $dip $direction_of_dip
 }
 
 convert_measurement_to_RHR_bearing(){
@@ -118,11 +113,7 @@ convert_measurement_to_RHR_bearing(){
 	direction_of_dip="NW"
     fi
 
-    if [ ! -z "$2" ]; then
-	printf "%s/%d%s " $strike $dip $direction_of_dip >> "$output"
-    else
-	printf "%s/%d%s " $strike $dip $direction_of_dip
-    fi
+    printf "%s/%d%s " $strike $dip $direction_of_dip
 }
 
 convert_measurement_to_UK_RHR_azimuth(){
@@ -153,11 +144,7 @@ convert_measurement_to_UK_RHR_azimuth(){
 	direction_of_dip="NW"
     fi
 
-    if [ ! -z "$2" ]; then
-	printf "%03d/%d%s " $strike $dip $direction_of_dip >> "$output"
-    else
-	printf "%03d/%d%s " $strike $dip $direction_of_dip
-    fi
+    printf "%03d/%d%s " $strike $dip $direction_of_dip
 }
 
 convert_measurement_to_UK_RHR_bearing(){
@@ -195,11 +182,7 @@ convert_measurement_to_UK_RHR_bearing(){
 	direction_of_dip="NW"
     fi
 
-    if [ ! -z "$2" ]; then
-	printf "%s/%d%s " $strike $dip $direction_of_dip >> "$output"
-    else
-	printf "%s/%d%s " $strike $dip $direction_of_dip
-    fi
+    printf "%s/%d%s " $strike $dip $direction_of_dip
 }
 
 read_file(){
@@ -207,23 +190,19 @@ read_file(){
     do
 	check_d_dd_measurement "$line"
 	if [ $? -eq 0 ]; then
-	    convert_measurement_to_RHR_azimuth "$line" "$5"
+	    convert_measurement_to_RHR_azimuth "$line"
 
 	    if [ ! -z "$2" ]; then
-		convert_measurement_to_UK_RHR_azimuth "$line" "$5"
+		convert_measurement_to_UK_RHR_azimuth "$line"
 	    fi
 	    if [ ! -z "$3" ]; then
-		convert_measurement_to_RHR_bearing "$line" "$5"
+		convert_measurement_to_RHR_bearing "$line"
 	    fi
 	    if [ ! -z "$4" ]; then
-		convert_measurement_to_UK_RHR_bearing "$line" "$5"
+		convert_measurement_to_UK_RHR_bearing "$line"
 	    fi
 
-	    if [ ! -z "$5" ]; then
-		printf "\n" >> "$output"
-	    else
-		printf "\n"
-	    fi
+	    printf "\n"
 	    (( converted_infile_measurement++ ))
 	else
 	    (( invalid_infile_measurement++ ))
@@ -234,23 +213,19 @@ read_file(){
 read_measurement(){
     check_d_dd_measurement "$1"
     if [ $? -eq 0 ]; then
-	convert_measurement_to_RHR_azimuth "$1" "$5"
+	convert_measurement_to_RHR_azimuth "$1"
 
 	if [ ! -z "$2" ]; then
-	    convert_measurement_to_UK_RHR_azimuth "$1" "$5"
+	    convert_measurement_to_UK_RHR_azimuth "$1"
 	fi
 	if [ ! -z "$3" ]; then
-	    convert_measurement_to_RHR_bearing "$1" "$5"
+	    convert_measurement_to_RHR_bearing "$1"
 	fi
 	if [ ! -z "$4" ]; then
-	    convert_measurement_to_UK_RHR_bearing "$1" "$5"
+	    convert_measurement_to_UK_RHR_bearing "$1"
 	fi
 
-	if [ ! -z "$5" ]; then
-	    printf "\n" >> "$output"
-	else
-	    printf "\n"
-	fi
+	printf "\n"
 	(( converted_measurement++ ))
     else
 	(( invalid_measurement++ ))
@@ -258,19 +233,11 @@ read_measurement(){
 }
 
 print_conversion_report(){
-    if [ ! -z "$1" ]; then
-	printf "%s%d\n%s%d\n%s%d\n%s%d\n" \
-	    "Converted Infile : " "$converted_infile_measurement" \
-	    "Invalid   Infile : " "$invalid_infile_measurement" \
-	    "Converted        : " "$converted_measurement" \
-	    "Invalid          : " "$invalid_measurement" >> "$output"
-    else
-	printf "%s%d\n%s%d\n%s%d\n%s%d\n" \
-	    "Converted Infile : " "$converted_infile_measurement" \
-	    "Invalid   Infile : " "$invalid_infile_measurement" \
-	    "Converted        : " "$converted_measurement" \
-	    "Invalid          : " "$invalid_measurement"
-    fi
+    printf "%s%d\n%s%d\n%s%d\n%s%d\n" \
+	"Converted Infile : " "$converted_infile_measurement" \
+	"Invalid   Infile : " "$invalid_infile_measurement" \
+	"Converted        : " "$converted_measurement" \
+	"Invalid          : " "$invalid_measurement"
 }
 
 # -------------------------------------------------------------------------------- 
@@ -281,7 +248,7 @@ declare uflag=
 declare rflag=
 declare oflag=
 
-while getopts ":aburo:h" name
+while getopts ":aburh" name
 do
     case "$name"
 	in
@@ -289,26 +256,20 @@ do
 	b) bflag=1 ;;
 	u) uflag=1 ;;
 	r) rflag=1 ;;
-	o) oflag=1 
-	    output="$OPTARG" ;;
-	:) echo "[ERROR] : Missing argument for -$OPTARG" 1>&2
-	    exit 2 ;;
 	\?) echo "[ERROR] : Unknown option -$OPTARG" 1>&2
-	    printf "          Usage: %s [-a | -b | -u] [-r] [-o OUTPUT_PATH] (MEASUREMENT | MEASUREMENT_FILE)...\n" "$0"
+	    printf "          Usage: %s [-a | -b | -u] [-r] (MEASUREMENT | MEASUREMENT_FILE)...\n" "$0"
 	    printf "%s\n%s\n%s\n%s\n%s\n%s\n" \
 		"                 -a    strike in UK-RHR-azimuth format,  dip direction 90⁰ counter-clockwise from strike" \
 		"                 -b    strike in    RHR-bearing format,  dip direction 90⁰ clockwise from strike" \
 		"                 -u    strike in UK-RHR-bearing format,  dip direction 90⁰ counter-clockwise from strike" \
-		"                 -o OUTPUT_PATH   write output in to the OUTPUT_PATH" \
 		"                 -r    print out number of converted and invalid measurements" \
 		"                 -h    Display help"
-	    exit 3 ;;
-	h|*) printf "Usage: %s [-a | -b | -u] [-r] [-o OUTPUT_PATH] (MEASUREMENT | MEASUREMENT_FILE)...\n" "$0"
+	    exit 2 ;;
+	h|*) printf "Usage: %s [-a | -b | -u] [-r] (MEASUREMENT | MEASUREMENT_FILE)...\n" "$0"
 	    printf "%s\n%s\n%s\n%s\n%s\n%s\n" \
 		"       -a    strike in UK-RHR-azimuth format,  dip direction 90⁰ counter-clockwise from strike" \
 		"       -b    strike in    RHR-bearing format,  dip direction 90⁰ clockwise from strike" \
 		"       -u    strike in UK-RHR-bearing format,  dip direction 90⁰ counter-clockwise from strike" \
-		"       -o OUTPUT_PATH   write output in to the OUTPUT_PATH" \
 		"       -r    print out number of converted and invalid measurements" \
 		"       -h    Display help"
 	    exit 0 ;;
@@ -316,29 +277,17 @@ do
 done
 shift $((OPTIND - 1))
 
-if [ ! -z "$oflag"  -a  -f "$output" ]; then
-    read -n 1 -p "\n'$output' exists. Would you like to overwrite? (y/n) "
-    case "$REPLY" in
-	y|Y)   
-	       echo -e "\n[PASSED] : Continuing execution with overwriting '$output'"
-	       rm  "$output" ;;
-	[^nN]) echo -e "\n[ERROR]  : Invalid REPLY. Aborting execution" 1>&2; 
-	       exit 4 ;;
-	*)     echo -e "\n[PASSED] : Continuing execution without overwriting '$output'" ;;
-    esac
-fi
-
 for arg
 do
     if [ -f "$1" ]; then
-	read_file "$1" "$aflag" "$bflag" "$uflag" "$oflag"
+	read_file "$1" "$aflag" "$bflag" "$uflag"
     else
-	read_measurement "$1" "$aflag" "$bflag" "$uflag" "$oflag"
+	read_measurement "$1" "$aflag" "$bflag" "$uflag"
     fi
 
     shift
 done
 
 if [ ! -z $rflag ];then
-    print_conversion_report "$oflag"
+    print_conversion_report
 fi
