@@ -17,8 +17,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 if [ $# -eq 0 ]; then
-    printf "Usage: %s (-a | -b | -A | -B) [-r] (MEASUREMENT | MEASUREMENT_FILE)...\n" "$0"
-    printf "%s\n%s\n%s\n%s\n%s\n%s\n" \
+    printf "Usage: %s (-a | -b | -A | -B) [-r] [-d DELIM] (MEASUREMENT | MEASUREMENT_FILE)...\n" "$0"
+    printf "%s\n%s\n%s\n%s\n%s\n%s\n%s\n" \
 	"       -a    strike in    RHR-azimuth format,  dip direction 90⁰ clockwise from strike" \
 	"       -b    strike in    RHR-bearing format,  dip direction 90⁰ clockwise from strike" \
 	"       -A    strike in UK-RHR-azimuth format,  dip direction 90⁰ counter-clockwise from strike" \
@@ -283,8 +283,8 @@ do
 	    exit 5 ;;
 	r) rflag=1 ;;
 	\?) echo "[ERROR] : Unknown option -$OPTARG" 1>&2
-	    printf "          Usage: %s (-a | -b | -A | -B) [-r] (MEASUREMENT | MEASUREMENT_FILE)...\n" "$0"
-	    printf "%s\n%s\n%s\n%s\n%s\n%s\n" \
+	    printf "          Usage: %s (-a | -b | -A | -B) [-r] [-d DELIM] (MEASUREMENT | MEASUREMENT_FILE)...\n" "$0"
+	    printf "%s\n%s\n%s\n%s\n%s\n%s\n%s\n" \
 		"                 -a    strike in    RHR-azimuth format,  dip direction 90⁰ clockwise from strike" \
 		"                 -b    strike in    RHR-bearing format,  dip direction 90⁰ clockwise from strike" \
 		"                 -A    strike in UK-RHR-azimuth format,  dip direction 90⁰ counter-clockwise from strike" \
@@ -293,8 +293,8 @@ do
 		"                 -r    print out number of converted and invalid measurements" \
 		"                 -h    Display help"
 	    exit 2 ;;
-	h|*) printf "Usage: %s (-a | -b | -A | -B) [-r] (MEASUREMENT | MEASUREMENT_FILE)...\n" "$0"
-	    printf "%s\n%s\n%s\n%s\n%s\n%s\n" \
+	h|*) printf "Usage: %s (-a | -b | -A | -B) [-r] [-d DELIM] (MEASUREMENT | MEASUREMENT_FILE)...\n" "$0"
+	    printf "%s\n%s\n%s\n%s\n%s\n%s\n%s\n" \
 		"       -a    strike in    RHR-azimuth format,  dip direction 90⁰ clockwise from strike" \
 		"       -b    strike in    RHR-bearing format,  dip direction 90⁰ clockwise from strike" \
 		"       -A    strike in UK-RHR-azimuth format,  dip direction 90⁰ counter-clockwise from strike" \
